@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>NeuroPulse: Memory & Focus Master</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        rajdhani: ['Rajdhani', 'sans-serif'],
+                    },
+                    colors: {
+                        neonCyan: '#00f3ff',
+                        neonPurple: '#b026ff',
+                        neonGreen: '#00ff66',
+                        neonPink: '#ff007f',
+                        darkBg: '#080914',
+                        cardBg: 'rgba(18, 22, 43, 0.75)',
+                    },
+                    boxShadow: {
+                        glowCyan: '0 0 20px rgba(0, 243, 255, 0.4)',
+                        glowPurple: '0 0 20px rgba(176, 38, 255, 0.4)',
+                        glowGreen: '0 0 20px rgba(0, 255, 102, 0.4)',
+                        glowPink: '0 0 20px rgba(255, 0, 127, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
+        }
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: #080914;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(176, 38, 255, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(0, 243, 255, 0.12) 0%, transparent 40%);
+            color: #e2e8f0;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: rgba(18, 22, 43, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Neon Text Glow */
+        .glow-text-cyan { text-shadow: 0 0 10px rgba(0, 243, 255, 0.6); }
+        .glow-text-purple { text-shadow: 0 0 10px rgba(176, 38, 255, 0.6); }
+        .glow-text-green { text-shadow: 0 0 10px rgba(0, 255, 102, 0.6); }
+
+        /* Custom Animated Grid Tiles */
+        .tile {
+            transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .tile.active-cyan {
+            background-color: #00f3ff !important;
+            box-shadow: 0 0 25px #00f3ff, inset 0 0 10px #ffffff;
+            transform: scale(0.96);
+        }
+        .tile.active-purple {
+            background-color: #b026ff !important;
+            box-shadow: 0 0 25px #b026ff, inset 0 0 10px #ffffff;
+            transform: scale(0.96);
+        }
+        .tile.active-green {
+            background-color: #00ff66 !important;
+            box-shadow: 0 0 25px #00ff66, inset 0 0 10px #ffffff;
+            transform: scale(0.96);
+        }
+        .tile.error {
+            background-color: #ff007f !important;
+            box-shadow: 0 0 25px #ff007f;
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        /* Pulse Animation */
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.03); }
+        }
+        .pulse-element {
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-between min-h-screen p-3 md:p-6 select-none">
+
+    <!-- Header Stats Bar -->
+    <header class="w-full max-w-md glass-panel rounded-2xl p-3 mb-3 flex items-center justify-between shadow-lg border border-cyan-500/20">
+        <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center text-neonCyan font-bold font-orbitron text-xs border border-cyan-500/40">
+                NP
+            </div>
+            <div>
+                <h1 class="font-orbitron text-xs font-black tracking-wider text-slate-200">NEUROPULSE</h1>
+                <div class="text-[10px] text-cyan-400 font-semibold tracking-widest uppercase" id="game-mode-label">HUB</div>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3 text-right">
+            <div>
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Sharpness</div>
+                <div id="sharpness-index" class="text-sm font-bold font-orbitron text-neonCyan glow-text-cyan">100 SI</div>
+            </div>
+            <div class="w-px h-6 bg-slate-700"></div>
+            <div>
+                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Streak</div>
+                <div id="streak-count" class="text-sm font-bold font-orbitron text-neonGreen glow-text-green">🔥 0</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN GAME CANVAS & CONTAINER -->
+    <main class="w-full max-w-md flex-1 flex flex-col justify-center items-center relative">
+
+        <!-- DASHBOARD / MODE SELECTOR SCREEN -->
+        <section id="screen-dashboard" class="w-full flex flex-col space-y-4">
+            
+            <!-- Hero Stats Box -->
+            <div class="glass-panel rounded-2xl p-5 text-center relative overflow-hidden border border-purple-500/30">
+                <div class="absolute -right-8 -top-8 w-28 h-28 bg-purple-600/20 rounded-full blur-xl pointer-events-none"></div>
+                <div class="text-xs uppercase tracking-widest text-purple-300 font-semibold mb-1">Cognitive Memory Index</div>
+                <div id="dash-score" class="text-4xl font-black font-orbitron text-transparent bg-clip-text bg-gradient-to-r from-neonCyan via-neonPurple to-neonGreen py-1">
+                    0
+                </div>
+                <div class="flex justify-around items-center mt-4 pt-3 border-t border-slate-800 text-xs">
+                    <div>
+                        <span class="text-slate-400 block">Best Score</span>
+                        <span id="dash-best-score" class="font-orbitron font-bold text-slate-200 text-sm">0</span>
+                    </div>
+                    <div class="w-px h-6 bg-slate-800"></div>
+                    <div>
+                        <span class="text-slate-400 block">Tests Passed</span>
+                        <span id="dash-tests-count" class="font-orbitron font-bold text-slate-200 text-sm">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mode 1: Pattern Matrix -->
+            <button onclick="launchMode('matrix')" class="glass-panel glass-button rounded-2xl p-4 flex items-center space-x-4 text-left hover:border-cyan-400/50 group">
+                <div class="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-2xl text-neonCyan group-hover:scale-110 transition-transform">
+                    🧩
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-orbitron font-bold text-sm text-slate-100">Pattern Matrix</h3>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Visuo-Spatial</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Memorize glowing spatial tile patterns & replicate the exact sequence.</p>
+                </div>
+            </button>
+
+            <!-- Mode 2: Speed Sequence -->
+            <button onclick="launchMode('sequence')" class="glass-panel glass-button rounded-2xl p-4 flex items-center space-x-4 text-left hover:border-purple-400/50 group">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-2xl text-neonPurple group-hover:scale-110 transition-transform">
+                    ⚡
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-orbitron font-bold text-sm text-slate-100">Speed Sequence</h3>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">Working Memory</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Flash digits, colors, or symbols. Recall forward, sorted or inverted.</p>
+                </div>
+            </button>
+
+            <!-- Mode 3: Dual-N-Back Burst -->
+            <button onclick="launchMode('dualn')" class="glass-panel glass-button rounded-2xl p-4 flex items-center space-x-4 text-left hover:border-green-400/50 group">
+                <div class="w-12 h-12 rounded-xl bg-green-500/20 border border-green-400/30 flex items-center justify-center text-2xl text-neonGreen group-hover:scale-110 transition-transform">
+                    🧠
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-orbitron font-bold text-sm text-slate-100">Dual Focus N-Back</h3>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-green-500/20 text-green-300 border border-green-500/30">Focus & Executive</span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">Identify matches N-steps back in real-time visual & auditory pulses.</p>
+                </div>
+            </button>
+
+        </section>
+
+        <!-- GAMEPLAY CONTAINER (SHARED) -->
+        <section id="screen-gameplay" class="w-full flex-1 flex flex-col items-center justify-between hidden py-2">
+            
+            <!-- Dynamic Prompt / Instruction Text -->
+            <div class="w-full text-center my-2">
+                <div id="game-prompt" class="text-lg font-bold font-orbitron text-cyan-300 glow-text-cyan tracking-wide">
+                    Memorize Pattern...
+                </div>
+                <div id="game-subprompt" class="text-xs text-slate-400 mt-0.5 font-medium">
+                    Level 1 - Grid 3x3
+                </div>
+            </div>
+
+            <!-- Interactive Area (Swappable per game mode) -->
+            <div id="play-area" class="w-full aspect-square max-w-[340px] glass-panel rounded-3xl p-3 flex items-center justify-center relative my-auto border border-slate-700/50 shadow-2xl">
+                <!-- Content injected dynamically via JavaScript -->
+            </div>
+
+            <!-- Control Buttons / Footer Actions -->
+            <div class="w-full flex items-center justify-between gap-3 mt-4">
+                <button onclick="exitToDashboard()" class="glass-panel glass-button px-4 py-2.5 rounded-xl text-xs font-bold font-orbitron text-slate-300 flex items-center space-x-1 hover:text-white">
+                    <span>✕</span> <span>EXIT</span>
+                </button>
+                <div id="timer-bar-container" class="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                    <div id="timer-bar" class="h-full bg-gradient-to-r from-neonCyan to-neonPurple w-full transition-all ease-linear"></div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- LEVEL COMPLETE / GAME OVER OVERLAY -->
+        <div id="modal-result" class="fixed inset-0 bg-darkBg/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+            <div class="w-full max-w-sm glass-panel rounded-3xl p-6 text-center border border-purple-500/40 shadow-2xl relative overflow-hidden">
+                <div id="modal-glow" class="absolute -top-12 left-1/2 -translate-x-1/2 w-32 h-32 bg-cyan-500/30 rounded-full blur-2xl pointer-events-none"></div>
+
+                <div id="modal-icon" class="text-5xl mb-2">🎉</div>
+                <h2 id="modal-title" class="text-2xl font-black font-orbitron text-transparent bg-clip-text bg-gradient-to-r from-neonCyan to-neonGreen">
+                    TEST COMPLETED!
+                </h2>
+                <p id="modal-desc" class="text-xs text-slate-300 mt-1 mb-4">Your brain processed patterns at high velocity.</p>
+
+                <!-- Stats summary card -->
+                <div class="bg-slate-900/80 rounded-2xl p-4 border border-slate-800 space-y-2 text-xs mb-6">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400">Score Earned</span>
+                        <span id="modal-score" class="font-orbitron font-bold text-neonCyan text-sm">+250</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400">Accuracy</span>
+                        <span id="modal-accuracy" class="font-orbitron font-bold text-neonGreen text-sm">100%</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400">Response Speed</span>
+                        <span id="modal-speed" class="font-orbitron font-bold text-purple-300 text-sm">420ms</span>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button onclick="retryCurrentMode()" class="flex-1 glass-panel glass-button py-3 rounded-xl font-orbitron font-bold text-xs text-slate-200 border-slate-700">
+                        RETRY
+                    </button>
+                    <button onclick="nextOrReturn()" id="modal-action-btn" class="flex-1 bg-gradient-to-r from-neonCyan to-neonPurple py-3 rounded-xl font-orbitron font-bold text-xs text-slate-900 shadow-glowCyan active:scale-95 transition-transform">
+                        CONTINUE
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer Copyright / Version -->
+    <footer class="text-[10px] text-slate-500 font-semibold tracking-wider text-center mt-2">
+        NEUROPULSE COGNITIVE LABS • V2.5 MOBILE READY
+    </footer>
+
+    <!-- Particle Canvas Layer -->
+    <canvas id="particleCanvas" class="fixed inset-0 pointer-events-none z-40"></canvas>
+
+    <!-- GAME LOGIC SCRIPT -->
+    <script>
+        /* ----------------------------------------------------
+           AUDIO SYNTHESIZER (WEB AUDIO API)
+        ---------------------------------------------------- */
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                if (!audioCtx) return;
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'tap') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'pulse') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(320, now);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+                    osc.start(now);
+                    osc.stop(now + 0.12);
+                }
+            } catch (e) {
+                console.log("Audio play blocked or unsupported", e);
+            }
+        }
+
+        function triggerHaptic(type = 'light') {
+            if ('vibrate' in navigator) {
+                if (type === 'light') navigator.vibrate(20);
+                if (type === 'medium') navigator.vibrate(40);
+                if (type === 'error') navigator.vibrate([40, 60, 40]);
+            }
+        }
+
+        /* ----------------------------------------------------
+           GAME STATE & STORAGE MANAGEMENT
+        ---------------------------------------------------- */
+        let state = {
+            score: parseInt(localStorage.getItem('np_score') || '0'),
+            bestScore: parseInt(localStorage.getItem('np_best') || '0'),
+            streak: parseInt(localStorage.getItem('np_streak') || '0'),
+            testsCount: parseInt(localStorage.getItem('np_tests') || '0'),
+            sharpness: 100,
+            activeMode: null, // 'matrix', 'sequence', 'dualn'
+            currentLevel: 1,
+            isInputAllowed: false,
+            startTime: 0,
+            responseTimeAccumulator: [],
+        };
+
+        function saveUserData() {
+            localStorage.setItem('np_score', state.score);
+            localStorage.setItem('np_best', state.bestScore);
+            localStorage.setItem('np_streak', state.streak);
+            localStorage.setItem('np_tests', state.testsCount);
+        }
+
+        function updateUIHeader() {
+            document.getElementById('dash-score').innerText = state.score;
+            document.getElementById('dash-best-score').innerText = state.bestScore;
+            document.getElementById('dash-tests-count').innerText = state.testsCount;
+            document.getElementById('sharpness-index').innerText = `${state.sharpness} SI`;
+            document.getElementById('streak-count').innerText = `🔥 ${state.streak}`;
+        }
+
+        /* ----------------------------------------------------
+           PARTICLE CELEBRATION SYSTEM
+        ---------------------------------------------------- */
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function spawnParticles(x, y, count = 30) {
+            const colors = ['#00f3ff', '#b026ff', '#00ff66', '#ff007f'];
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x || canvas.width / 2,
+                    y: y || canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 8,
+                    vy: (Math.random() - 0.5) * 8 - 2,
+                    size: Math.random() * 4 + 2,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    alpha: 1,
+                    decay: Math.random() * 0.02 + 0.015
+                });
+            }
+        }
+
+        function renderParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= p.decay;
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+            requestAnimationFrame(renderParticles);
+        }
+        renderParticles();
+
+        /* ----------------------------------------------------
+           NAVIGATION & FLOW CONTROL
+        ---------------------------------------------------- */
+        function launchMode(mode) {
+            initAudio();
+            state.activeMode = mode;
+            state.currentLevel = 1;
+            state.responseTimeAccumulator = [];
+
+            document.getElementById('screen-dashboard').classList.add('hidden');
+            document.getElementById('screen-gameplay').classList.remove('hidden');
+
+            const labelEl = document.getElementById('game-mode-label');
+            if (mode === 'matrix') labelEl.innerText = "PATTERN MATRIX";
+            if (mode === 'sequence') labelEl.innerText = "SPEED SEQUENCE";
+            if (mode === 'dualn') labelEl.innerText = "DUAL N-BACK";
+
+            startModeLevel();
+        }
+
+        function exitToDashboard() {
+            state.activeMode = null;
+            state.isInputAllowed = false;
+            document.getElementById('screen-gameplay').classList.add('hidden');
+            document.getElementById('screen-dashboard').classList.remove('hidden');
+            document.getElementById('game-mode-label').innerText = "HUB";
+            updateUIHeader();
+        }
+
+        function startModeLevel() {
+            document.getElementById('modal-result').classList.add('hidden');
+            state.isInputAllowed = false;
+
+            if (state.activeMode === 'matrix') initMatrixLevel();
+            if (state.activeMode === 'sequence') initSequenceLevel();
+            if (state.activeMode === 'dualn') initDualNLevel();
+        }
+
+        /* ----------------------------------------------------
+           MODE 1: PATTERN MATRIX (Visuo-Spatial)
+        ---------------------------------------------------- */
+        let matrixData = {
+            gridSize: 3,
+            sequence: [],
+            playerIndex: 0
+        };
+
+        function initMatrixLevel() {
+            // Difficulty curve
+            matrixData.gridSize = state.currentLevel <= 2 ? 3 : (state.currentLevel <= 5 ? 4 : 5);
+            const count = Math.min(3 + state.currentLevel, matrixData.gridSize * matrixData.gridSize - 1);
+            
+            document.getElementById('game-prompt').innerText = "MEMORIZE PATTERN";
+            document.getElementById('game-subprompt').innerText = `Level ${state.currentLevel} • Grid ${matrixData.gridSize}x${matrixData.gridSize}`;
+
+            const playArea = document.getElementById('play-area');
+            playArea.innerHTML = '';
+
+            const gridDiv = document.createElement('div');
+            gridDiv.className = `grid gap-2 w-full h-full`;
+            gridDiv.style.gridTemplateColumns = `repeat(${matrixData.gridSize}, minmax(0, 1fr))`;
+
+            const totalTiles = matrixData.gridSize * matrixData.gridSize;
+            for (let i = 0; i < totalTiles; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile glass-panel rounded-xl flex items-center justify-center cursor-pointer border border-white/10 aspect-square';
+                tile.dataset.id = i;
+                tile.addEventListener('pointerdown', (e) => onMatrixTileTap(i, tile));
+                gridDiv.appendChild(tile);
+            }
+            playArea.appendChild(gridDiv);
+
+            // Generate unique random tile pattern
+            const pool = Array.from({length: totalTiles}, (_, k) => k);
+            matrixData.sequence = [];
+            for (let i = 0; i < count; i++) {
+                const randIndex = Math.floor(Math.random() * pool.length);
+                matrixData.sequence.push(pool.splice(randIndex, 1)[0]);
+            }
+            matrixData.playerIndex = 0;
+
+            // Flash pattern sequence
+            setTimeout(() => flashMatrixPattern(), 600);
+        }
+
+        function flashMatrixPattern() {
+            const tiles = document.querySelectorAll('.tile');
+            let delay = 0;
+            const flashDuration = Math.max(300, 600 - state.currentLevel * 30);
+
+            matrixData.sequence.forEach((tileIdx, i) => {
+                setTimeout(() => {
+                    tiles[tileIdx].classList.add('active-cyan');
+                    playSound('pulse');
+                    triggerHaptic('light');
+
+                    setTimeout(() => {
+                        tiles[tileIdx].classList.remove('active-cyan');
+                        if (i === matrixData.sequence.length - 1) {
+                            // Enable user inputs
+                            setTimeout(() => {
+                                document.getElementById('game-prompt').innerText = "REPLICATE PATTERN";
+                                state.isInputAllowed = true;
+                                state.startTime = performance.now();
+                            }, 200);
+                        }
+                    }, flashDuration);
+
+                }, delay);
+                delay += flashDuration + 150;
+            });
+        }
+
+        function onMatrixTileTap(id, tileEl) {
+            if (!state.isInputAllowed) return;
+
+            const responseSpeed = performance.now() - state.startTime;
+            state.responseTimeAccumulator.push(responseSpeed);
+            state.startTime = performance.now(); // Reset for next tap
+
+            const expected = matrixData.sequence[matrixData.playerIndex];
+
+            if (id === expected) {
+                playSound('tap');
+                triggerHaptic('light');
+                tileEl.classList.add('active-cyan');
+                matrixData.playerIndex++;
+
+                if (matrixData.playerIndex === matrixData.sequence.length) {
+                    state.isInputAllowed = false;
+                    setTimeout(() => completeLevel(true), 300);
+                }
+            } else {
+                playSound('error');
+                triggerHaptic('error');
+                tileEl.classList.add('error');
+                state.isInputAllowed = false;
+                setTimeout(() => completeLevel(false), 500);
+            }
+        }
+
+        /* ----------------------------------------------------
+           MODE 2: SPEED SEQUENCE (Working Memory)
+        ---------------------------------------------------- */
+        let seqData = {
+            symbols: [],
+            playerSequence: [],
+            modeType: 'numbers' // numbers, symbols, colors
+        };
+
+        const SYMBOL_SET = ['⚡', '💎', '🔥', '🌀', '🎯', '🚀', '🔮', '🌟'];
+        const COLOR_SET = [
+            { name: 'Cyan', bg: '#00f3ff', class: 'active-cyan' },
+            { name: 'Purple', bg: '#b026ff', class: 'active-purple' },
+            { name: 'Green', bg: '#00ff66', class: 'active-green' }
+        ];
+
+        function initSequenceLevel() {
+            seqData.modeType = state.currentLevel % 2 === 1 ? 'symbols' : 'numbers';
+            const length = 3 + Math.floor(state.currentLevel / 2);
+
+            document.getElementById('game-prompt').innerText = "WATCH SEQUENCE";
+            document.getElementById('game-subprompt').innerText = `Level ${state.currentLevel} • Length ${length}`;
+
+            const playArea = document.getElementById('play-area');
+            playArea.innerHTML = `
+                <div id="seq-display" class="text-6xl font-black font-orbitron text-neonCyan glow-text-cyan flex items-center justify-center">
+                    ---
+                </div>
+            `;
+
+            // Build item sequence
+            seqData.symbols = [];
+            for (let i = 0; i < length; i++) {
+                if (seqData.modeType === 'symbols') {
+                    seqData.symbols.push(SYMBOL_SET[Math.floor(Math.random() * SYMBOL_SET.length)]);
+                } else {
+                    seqData.symbols.push(Math.floor(Math.random() * 9) + 1);
+                }
+            }
+            seqData.playerSequence = [];
+
+            setTimeout(() => runSpeedSequence(), 800);
+        }
+
+        function runSpeedSequence() {
+            const display = document.getElementById('seq-display');
+            let i = 0;
+            const speed = Math.max(350, 700 - state.currentLevel * 40);
+
+            const interval = setInterval(() => {
+                if (i < seqData.symbols.length) {
+                    display.innerText = seqData.symbols[i];
+                    display.classList.add('scale-125');
+                    playSound('pulse');
+                    triggerHaptic('light');
+
+                    setTimeout(() => display.classList.remove('scale-125'), speed - 100);
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    display.innerText = '?';
+                    renderSequenceInputPad();
+                }
+            }, speed);
+        }
+
+        function renderSequenceInputPad() {
+            document.getElementById('game-prompt').innerText = "RECALL SEQUENCE";
+            state.isInputAllowed = true;
+            state.startTime = performance.now();
+
+            const playArea = document.getElementById('play-area');
+            playArea.innerHTML = '';
+
+            const pad = document.createElement('div');
+            pad.className = 'grid grid-cols-3 gap-2 w-full h-full';
+
+            const options = seqData.modeType === 'symbols' ? SYMBOL_SET.slice(0, 9) : [1,2,3,4,5,6,7,8,9];
+
+            options.forEach(val => {
+                const btn = document.createElement('button');
+                btn.className = 'glass-panel glass-button rounded-2xl flex items-center justify-center text-xl font-bold font-orbitron text-slate-100 hover:border-cyan-400/50';
+                btn.innerText = val;
+                btn.onclick = () => onSequencePadInput(val, btn);
+                pad.appendChild(btn);
+            });
+
+            playArea.appendChild(pad);
+        }
+
+        function onSequencePadInput(val, btnEl) {
+            if (!state.isInputAllowed) return;
+
+            state.responseTimeAccumulator.push(performance.now() - state.startTime);
+            state.startTime = performance.now();
+
+            seqData.playerSequence.push(val);
+            const idx = seqData.playerSequence.length - 1;
+
+            if (seqData.symbols[idx] === val) {
+                playSound('tap');
+                triggerHaptic('light');
+                btnEl.classList.add('border-cyan-400', 'bg-cyan-500/20');
+
+                if (seqData.playerSequence.length === seqData.symbols.length) {
+                    state.isInputAllowed = false;
+                    setTimeout(() => completeLevel(true), 300);
+                }
+            } else {
+                playSound('error');
+                triggerHaptic('error');
+                btnEl.classList.add('border-pink-500', 'bg-pink-500/30');
+                state.isInputAllowed = false;
+                setTimeout(() => completeLevel(false), 400);
+            }
+        }
+
+        /* ----------------------------------------------------
+           MODE 3: DUAL-N-BACK BURST (Executive Focus)
+        ---------------------------------------------------- */
+        let dualData = {
+            nBack: 1,
+            history: [],
+            currentStep: 0,
+            totalSteps: 10,
+            matchesExpected: 0,
+            matchesDetected: 0
+        };
+
+        function initDualNLevel() {
+            dualData.nBack = state.currentLevel <= 3 ? 1 : 2;
+            dualData.totalSteps = 8 + state.currentLevel * 2;
+            dualData.history = [];
+            dualData.currentStep = 0;
+            dualData.matchesExpected = 0;
+            dualData.matchesDetected = 0;
+
+            document.getElementById('game-prompt').innerText = `MATCH ${dualData.nBack}-STEP BACK?`;
+            document.getElementById('game-subprompt').innerText = `Level ${state.currentLevel} • Target N=${dualData.nBack}`;
+
+            const playArea = document.getElementById('play-area');
+            playArea.innerHTML = `
+                <div class="flex flex-col items-center justify-between h-full w-full py-4">
+                    <div id="dual-box" class="w-32 h-32 rounded-3xl glass-panel border-2 border-slate-700 flex items-center justify-center text-4xl font-black font-orbitron transition-all duration-200">
+                        •
+                    </div>
+                    <button id="dual-match-btn" onclick="onDualMatchTap()" class="w-full glass-panel glass-button py-4 rounded-2xl font-orbitron font-bold text-neonGreen text-sm border-green-500/30 shadow-glowGreen active:scale-95">
+                        MATCH DETECTED!
+                    </button>
+                </div>
+            `;
+
+            setTimeout(() => runDualNLoop(), 800);
+        }
+
+        function runDualNLoop() {
+            const symbols = ['▲', '■', '◆', '★'];
+            const box = document.getElementById('dual-box');
+            state.isInputAllowed = true;
+
+            const interval = setInterval(() => {
+                if (dualData.currentStep >= dualData.totalSteps) {
+                    clearInterval(interval);
+                    state.isInputAllowed = false;
+                    const accuracy = dualData.matchesExpected === 0 ? 1 : (dualData.matchesDetected / dualData.matchesExpected);
+                    completeLevel(accuracy >= 0.6);
+                    return;
+                }
+
+                // Pick symbol with 35% chance of being an N-Back match
+                let symbol;
+                if (dualData.history.length >= dualData.nBack && Math.random() < 0.38) {
+                    symbol = dualData.history[dualData.history.length - dualData.nBack];
+                    dualData.matchesExpected++;
+                } else {
+                    symbol = symbols[Math.floor(Math.random() * symbols.length)];
+                }
+
+                dualData.history.push(symbol);
+                box.innerText = symbol;
+                box.className = "w-32 h-32 rounded-3xl glass-panel border-2 border-cyan-400 text-neonCyan shadow-glowCyan flex items-center justify-center text-5xl font-black font-orbitron scale-110 transition-all duration-150";
+                playSound('pulse');
+
+                setTimeout(() => {
+                    box.className = "w-32 h-32 rounded-3xl glass-panel border-2 border-slate-700 text-slate-400 flex items-center justify-center text-4xl font-black font-orbitron transition-all duration-150";
+                }, 400);
+
+                dualData.currentStep++;
+            }, 1200);
+        }
+
+        function onDualMatchTap() {
+            if (!state.isInputAllowed) return;
+
+            const targetIdx = dualData.history.length - 1 - dualData.nBack;
+            if (targetIdx >= 0 && dualData.history[dualData.history.length - 1] === dualData.history[targetIdx]) {
+                playSound('tap');
+                triggerHaptic('light');
+                dualData.matchesDetected++;
+                spawnParticles(window.innerWidth / 2, window.innerHeight / 2, 10);
+            } else {
+                playSound('error');
+                triggerHaptic('error');
+            }
+        }
+
+        /* ----------------------------------------------------
+           LEVEL COMPLETION & SHARPNESS EVALUATION
+        ---------------------------------------------------- */
+        function completeLevel(isSuccess) {
+            state.testsCount++;
+
+            // Calculate response time average
+            const avgSpeed = state.responseTimeAccumulator.length > 0
+                ? Math.round(state.responseTimeAccumulator.reduce((a,b)=>a+b, 0) / state.responseTimeAccumulator.length)
+                : 450;
+
+            const modal = document.getElementById('modal-result');
+            const titleEl = document.getElementById('modal-title');
+            const descEl = document.getElementById('modal-desc');
+            const iconEl = document.getElementById('modal-icon');
+            const scoreEl = document.getElementById('modal-score');
+            const accEl = document.getElementById('modal-accuracy');
+            const speedEl = document.getElementById('modal-speed');
+
+            if (isSuccess) {
+                playSound('correct');
+                triggerHaptic('medium');
+                spawnParticles(window.innerWidth / 2, window.innerHeight / 3, 40);
+
+                state.streak++;
+                const levelScore = 150 + (state.currentLevel * 50) + Math.max(0, 1000 - avgSpeed);
+                state.score += levelScore;
+
+                if (state.score > state.bestScore) {
+                    state.bestScore = state.score;
+                }
+
+                // Sharpness calculation formula
+                state.sharpness = Math.min(180, Math.round(state.sharpness + 3 + (state.streak * 0.5)));
+
+                iconEl.innerText = "⚡";
+                titleEl.innerText = "COGNITIVE LEAP!";
+                titleEl.className = "text-2xl font-black font-orbitron text-transparent bg-clip-text bg-gradient-to-r from-neonCyan to-neonGreen";
+                descEl.innerText = `Level ${state.currentLevel} cleared with high neural velocity.`;
+                scoreEl.innerText = `+${levelScore}`;
+                accEl.innerText = "100%";
+                speedEl.innerText = `${avgSpeed}ms`;
+
+                state.currentLevel++;
+            } else {
+                playSound('error');
+                triggerHaptic('error');
+
+                state.streak = 0;
+                state.sharpness = Math.max(60, state.sharpness - 5);
+
+                iconEl.innerText = "💥";
+                titleEl.innerText = "NEURAL OVERLOAD";
+                titleEl.className = "text-2xl font-black font-orbitron text-transparent bg-clip-text bg-gradient-to-r from-neonPink to-purple-400";
+                descEl.innerText = "Sequence broken. Realign focus and try again.";
+                scoreEl.innerText = "+0";
+                accEl.innerText = "0%";
+                speedEl.innerText = `${avgSpeed}ms`;
+            }
+
+            saveUserData();
+            updateUIHeader();
+            modal.classList.remove('hidden');
+        }
+
+        function retryCurrentMode() {
+            document.getElementById('modal-result').classList.add('hidden');
+            startModeLevel();
+        }
+
+        function nextOrReturn() {
+            document.getElementById('modal-result').classList.add('hidden');
+            startModeLevel();
+        }
+
+        // Initialize header stats on startup
+        updateUIHeader();
+    </script>
+</body>
+</html>
